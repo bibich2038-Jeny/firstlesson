@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+    <form id="login_form" action="#"method='POST'>
+        <input id="login" type="text">
+        <input id="pass" type="password">
+        <button type="submit">Войти</button>    
+    </form>
+    <script>
+        const form = document.getElementById("login_form");
+        form.addEventListener("submit", async function name(event) {
+            event.preventDefault();
+            const login = document.getElementById("login").value
+            const pass = document.getElementById("pass").value
+            console.log(login+" "+pass);
+            try{
+                const response = await fetch("/api/login",{
+                    method:"POST",
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+                    body: JSON.stringify(
+                        {
+                            login:login,
+                            password:pass
+                        }
+                    )
+                    
+                });
+                console.log(1);
+                const data = await response.json();
+                console.log(data.message);
+                if(response.ok && data.success){
+                    window.location.href=data.redirect;
+                }
+            }catch(error){
+            console.error(error);
+        }
+        }
+    )
+    </script>
+</body>
+</html>
