@@ -1,6 +1,10 @@
-from flask import Flask, render_template,request, url_for, redirect, jsonify
+from flask import Flask, render_template,request, url_for,redirect,jsonify,session
+from db import select_role, insert_users,insert_into,select_user,select_avtoriz
 app = Flask(__name__)
 app.json.ensure_ascii=False
+app.config["SESSION_COOKIE_HTTPONLY"]=True#передвёт куки только по https
+app.config["SESSION_COOKIE_SAMESITE"]="Lax"
+app.secret_key = "1211"
 products=[
         {"id":1,"name": 'Видеокарты'},
         {"id":2,"name":'Мат платы'}
@@ -12,6 +16,8 @@ users={
 
 @app.route('/')
 def index():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
     return render_template('index.html')
 
 @app.route('/cataloge')
@@ -40,18 +46,27 @@ def api_login():
     data = request.get_json()
     login = data.get("login")
     password = data.get("password")
+    user=select_avtoriz(login,password)
+
     if not isinstance(login,str) or not isinstance(password,str):
         return jsonify({
             "success":False,
             "messege":"Введите логин или пароль"
         }), 400
-    if login==users["login"] and password==users['pass']:
+    if len(user)!=0:
+        session.clear()
+        session["user_id"]=user[0]
         return jsonify({
             "success":True,
             "message":"Авторизация успешна",
             "redirect":url_for('cataloge')
-        })
-    return None
+        }),201
+    else:
+        return jsonify({
+            "success":False,
+            "message":"Авторизация не успешна",
+            "redirect":url_for('login')
+        }),201
 @app.route('/login')
 def login():
     return render_template('login.html')
