@@ -22,8 +22,41 @@ def index():
 
 @app.route('/cataloge')
 def cataloge():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
     return render_template('cataloge.html',
                             products=products)
+@app.route('/reg')
+def reg():
+    return render_template('registration.html')
+
+#API
+@app.route('/api/reg', methods=['POST'])
+def api_reg():
+        data = request.get_json()
+        login = data.get("login")
+        password = data.get("password")
+        # role = data.get("role")
+        if not login or not password: #or not role:
+            return jsonify({
+                "success":False,
+                "messege":"Введите логин или пароль"
+            }),400
+        req = insert_users(login,password)
+        if req==1:
+                # session.clear()
+                # session["user_id"]=user[0]
+            return jsonify({
+                    "success":True,
+                    "message":"Авторизация успешна",
+                    "redirect":url_for('reg')
+                }),201
+        else:
+            return jsonify({
+                    "success":False,
+                    "message":"Авторизация не успешна",
+                    "redirect":url_for('reg')
+                }),201
 
 @app.route('/api/products', methods=['GET'])
 def api_products():
@@ -31,6 +64,8 @@ def api_products():
 
 @app.route('/add')
 def add():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
     master=[[1, 'Мышки'],[2, 'Клавиатуры']]
     return render_template('add.html',
                         master=master)

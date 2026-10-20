@@ -93,25 +93,22 @@ def select_role():
     cursor = connect.cursor()
     cursor.execute(
         """
-        SELECT * FROM role WHERE 1
+        DELETE FROM users WHERE 1 
         """
     )
-    rows = cursor.fetchall()
     connect.commit()
     cursor.close()
-    return rows
-def insert_users():
+def insert_users(login,password):
     connect = sqlite3.connect(DB_NAME)
     cursor = connect.cursor()
     cursor.execute(
-        """
-        SELECT * FROM role WHERE 1
-        """
-    )
-    rows = cursor.fetchall()
+            """
+            INSERT INTO users(login,password,role_fk) 
+            VALUES(?,?,3)
+            """,(login,password))
     connect.commit()
     cursor.close()
-    return rows
+    return 1
 def insert_into():
     connect = sqlite3.connect(DB_NAME)
     cursor = connect.cursor()
